@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>日報作成ツール</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f0;
+      --surface: #ffffff;
+      --surface2: #f9f9f7;
+      --border: #e0ddd6;
+      --border-strong: #c8c5be;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a55;
+      --text-muted: #9a9a94;
+      --accent: #1a56db;
+      --accent-bg: #eef2ff;
+      --accent-text: #3a5bd0;
+      --brown: #7B4B1A;
+      --radius: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --surface: #2a2a27;
+        --surface2: #222220;
+        --border: #3a3a36;
+        --border-strong: #4a4a45;
+        --text: #eeeee8;
+        --text-secondary: #aaaaA0;
+        --text-muted: #666660;
+        --accent: #4a7aff;
+        --accent-bg: #1e2a4a;
+        --accent-text: #7a9fff;
+        --brown: #c8864a;
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.75rem;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    header .icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-bg);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 10px;
+      background: var(--accent-bg);
+      color: var(--accent-text);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 64px;
+      line-height: 1.5;
+    }
+
+    .rows { display: flex; flex-direction: column; gap: 6px; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .row input { flex: 1; }
+
+    .row-num {
+      font-size: 13px;
+      color: var(--text-muted);
+      min-width: 22px;
+      flex-shrink: 0;
+    }
+
+    .del-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 18px;
+      padding: 2px 4px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+
+    .del-btn:hover { color: #c0392b; }
+
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px 0;
+      margin-top: 4px;
+      font-family: inherit;
+    }
+
+    .add-btn:hover { opacity: 0.8; }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      padding: 9px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-primary { background: var(--accent); color: #fff; border: none; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 0.5px solid var(--border-strong); }
+    .btn-copy { background: #e8f5e9; color: #1b7c3c; border: 0.5px solid #a5d6a7; }
+
+    /* プレビュー */
+    .preview-wrap {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      display: none;
+      line-height: 2.1;
+    }
+
+    .p-date  { font-size: 26px; font-weight: 600; color: var(--brown); display: block; }
+    .p-head  { font-size: 18px; font-weight: 600; color: var(--brown); }
+    .p-body  { font-size: 15px; color: var(--text); display: block; }
+
+    .copy-hint {
+      font-size: 12px;
+      color: #1b7c3c;
+      margin-top: 8px;
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .two-col { grid-template-columns: 1fr; }
+      body { padding: 1rem 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="icon"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+    <h1>日報作成ツール</h1>
+  </header>
+
+  <!-- 基本情報 -->
+  <div class="card">
+    <div class="card-title">基本情報</div>
+    <div class="two-col">
+      <div class="field">
+        <label>日付</label>
+        <input type="date" id="date" />
+      </div>
+      <div class="field">
+        <label>勤務形態</label>
+        <select id="workStyle">
+          <option>晴海勤務</option>
+          <option>テレワーク</option>
+          <option>出張</option>
+          <option>休暇</option>
+        </select>
+      </div>
+    </div>
+    <div class="two-col" style="margin-bottom:0">
+      <div class="field" style="margin-bottom:0">
+        <label>勤務開始時間</label>
+        <input type="text" id="startTime" placeholder="例：11:30" />
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>勤務終了時間</label>
+        <input type="text" id="endTime" placeholder="例：17:30" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 本日の予定 -->
+  <div class="card">
+    <div class="card-title">本日の予定 <span class="tag">空欄は自動で「なし」</span></div>
+
+    <div class="field">
+      <label>会議</label>
+      <div class="rows" id="meetingRows">
+        <div class="row"><input type="text" placeholder="内容を入力..." /><button class="del-btn" onclick="delRow(this,'meetingRows')" title="削除">×</button></div>
+      </div>
+      <button class="add-btn" onclick="addRow('meetingRows','会議内容...')">
+        <i class="ti ti-plus" aria-hidden="true"></i>会議を追加
+      </button>
+    </div>
+
+    <div class="field">
+      <label>研修</label>
+      <div class="rows" id="trainingRows">
+        <div class="row"><input type="text" placeholder="内容を入力..." /><button class="del-btn" onclick="delRow(this,'trainingRows')" title="削除">×</button></div>
+      </div>
+      <button class="add-btn" onclick="addRow('trainingRows','研修内容...')">
+        <i class="ti ti-plus" aria-hidden="true"></i>研修を追加
+      </button>
+    </div>
+
+    <div class="field" style="margin-bottom:0">
+      <label>外出</label>
+      <div class="rows" id="outingRows">
+        <div class="row"><input type="text" placeholder="外出先を入力..." /><button class="del-btn" onclick="delRow(this,'outingRows')" title="削除">×</button></div>
+      </div>
+      <button class="add-btn" onclick="addRow('outingRows','外出先...')">
+        <i class="ti ti-plus" aria-hidden="true"></i>外出を追加
+      </button>
+    </div>
+  </div>
+
+  <!-- 本日の作業 -->
+  <div class="card">
+    <div class="card-title">本日の作業 <span class="tag">①②③は自動付与</span></div>
+    <p class="hint" style="margin-bottom:10px;">内容を入力するだけでOK。「・」や丸数字は自動でつきます。</p>
+    <div class="rows" id="taskRows">
+      <div class="row"><span class="row-num">①</span><input type="text" placeholder="作業内容..." /><button class="del-btn" onclick="delTaskRow(this)" title="削除">×</button></div>
+      <div class="row"><span class="row-num">②</span><input type="text" placeholder="作業内容..." /><button class="del-btn" onclick="delTaskRow(this)" title="削除">×</button></div>
+      <div class="row"><span class="row-num">③</span><input type="text" placeholder="作業内容（任意）..." /><button class="del-btn" onclick="delTaskRow(this)" title="削除">×</button></div>
+    </div>
+    <button class="add-btn" id="addTaskBtn">
+      <i class="ti ti-plus" aria-hidden="true"></i>作業を追加
+    </button>
+  </div>
+
+  <!-- その他 -->
+  <div class="card">
+    <div class="card-title">その他 <span class="tag">空欄は自動で「なし」</span></div>
+    <div class="field">
+      <label>連絡が取りにくい時間帯</label>
+      <span class="hint">例：13:00〜14:00　空欄なら「なし」と自動入力</span>
+      <input type="text" id="unavailable" placeholder="例：13:00〜14:00（空欄でOK）" />
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>相談事項・支援依頼</label>
+      <span class="hint">ある場合のみ入力。空欄なら「なし」と自動入力。</span>
+      <textarea id="consult" placeholder="相談内容（空欄でOK）"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="generateBtn">
+      <i class="ti ti-eye" aria-hidden="true"></i>プレビュー生成
+    </button>
+    <button class="btn btn-secondary" id="resetBtn">
+      <i class="ti ti-refresh" aria-hidden="true"></i>リセット
+    </button>
+  </div>
+
+  <div class="preview-wrap" id="preview"></div>
+
+  <div class="btn-row" id="copyRow" style="display:none">
+    <button class="btn btn-copy" id="copyBtn">
+      <i class="ti ti-copy" aria-hidden="true"></i>テキストをコピー
+    </button>
+  </div>
+  <div class="copy-hint" id="copyHint">✓ コピーしました！メールやチャットに貼り付けてください。</div>
+</div>
+
+<script>
+const nums = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+
+(function setToday() {
+  const d = new Date();
+  document.getElementById('date').value = d.toISOString().split('T')[0];
+})();
+
+function fmtDate(s) {
+  if (!s) return '　　';
+  const d = new Date(s + 'T00:00:00');
+  const wd = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${d.getMonth()+1}/${d.getDate()}(${wd})`;
+}
+
+function addRow(rowsId, ph) {
+  const area = document.getElementById(rowsId);
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<input type="text" placeholder="${ph}" /><button class="del-btn" onclick="delRow(this,'${rowsId}')" title="削除">×</button>`;
+  area.appendChild(row);
+}
+
+function delRow(btn, rowsId) {
+  const area = document.getElementById(rowsId);
+  const rows = area.querySelectorAll('.row');
+  if (rows.length <= 1) { rows[0].querySelector('input').value = ''; return; }
+  btn.closest('.row').remove();
+}
+
+function delTaskRow(btn) {
+  const area = document.getElementById('taskRows');
+  if (area.querySelectorAll('.row').length <= 1) {
+    area.querySelector('input').value = ''; return;
+  }
+  btn.closest('.row').remove();
+  renumber();
+}
+
+function renumber() {
+  document.querySelectorAll('#taskRows .row').forEach((r, i) => {
+    r.querySelector('.row-num').textContent = nums[i];
+  });
+}
+
+document.getElementById('addTaskBtn').addEventListener('click', () => {
+  const area = document.getElementById('taskRows');
+  const n = area.querySelectorAll('.row').length;
+  if (n >= 10) return;
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<span class="row-num">${nums[n]}</span><input type="text" placeholder="作業内容..." /><button class="del-btn" onclick="delTaskRow(this)" title="削除">×</button>`;
+  area.appendChild(row);
+});
+
+function getRows(rowsId) {
+  const vals = Array.from(document.querySelectorAll(`#${rowsId} input`))
+    .map(i => i.value.trim()).filter(v => v);
+  return vals.length ? vals : null;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderLine(line) {
+  if (/【[^】]+】/.test(line)) {
+    return '<span class="p-body">' + esc(line).replace(/【([^】]+)】/g,'<span class="p-head">【$1】</span>') + '</span>';
+  }
+  return `<span class="p-body">${esc(line)}</span>`;
+}
+
+function buildItem(label, vals) {
+  if (!vals) return [`・${label}：なし`];
+  if (vals.length === 1) return [`・${label}：${vals[0]}`];
+  return [`・${label}：${vals[0]}`, ...vals.slice(1).map(v => `　　　　　${v}`)];
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const dateStr = fmtDate(document.getElementById('date').value);
+  const workStyle = document.getElementById('workStyle').value;
+  const st = document.getElementById('startTime').value || '　';
+  const et = document.getElementById('endTime').value || '　';
+  const unavail = document.getElementById('unavailable').value.trim() || 'なし';
+  const consult = document.getElementById('consult').value.trim() || 'なし';
+
+  const meetings = getRows('meetingRows');
+  const trainings = getRows('trainingRows');
+  const outings = getRows('outingRows');
+
+  const taskInputs = document.querySelectorAll('#taskRows input');
+  const taskLines = [];
+  taskInputs.forEach((inp, i) => {
+    const v = inp.value.trim();
+    if (v) taskLines.push(`${nums[i]}${v}`);
+  });
+  if (!taskLines.length) taskLines.push('①');
+
+  const firstLine = `【${dateStr} ：予定】`;
+  const body = [
+    '【本日の勤務予定】',
+    `・勤務形態：${workStyle}`,
+    `・勤務時間：${st}-${et}`,
+    ' ',
+    '【本日の予定】',
+    ...buildItem('会議', meetings),
+    ...buildItem('研修', trainings),
+    ...buildItem('外出', outings),
+    ' ',
+    '【本日の作業】',
+    ...taskLines,
+    '【連絡が取りにくい時間帯】',
+    `・${unavail}`,
+    ' ',
+    '【相談事項・支援依頼】',
+    `・${consult}`,
+    '以上'
+  ];
+
+  window._reportText = [firstLine, ...body].join('\n');
+
+  const preview = document.getElementById('preview');
+  preview.style.display = 'block';
+  let html = `<span class="p-date">${esc(firstLine)}</span>`;
+  body.forEach(l => { html += renderLine(l); });
+  preview.innerHTML = html;
+  document.getElementById('copyRow').style.display = 'flex';
+  preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  if (!window._reportText) return;
+  navigator.clipboard.writeText(window._reportText).then(() => {
+    const h = document.getElementById('copyHint');
+    h.style.display = 'block';
+    setTimeout(() => h.style.display = 'none', 3000);
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+  document.getElementById('workStyle').selectedIndex = 0;
+  ['meetingRows','trainingRows','outingRows'].forEach(id => {
+    const a = document.getElementById(id);
+    a.querySelectorAll('.row').forEach((r, i) => { if (i > 0) r.remove(); });
+  });
+  document.querySelectorAll('#taskRows .row').forEach((r, i) => { if (i > 2) r.remove(); });
+  renumber();
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('copyRow').style.display = 'none';
+  const d = new Date();
+  document.getElementById('date').value = d.toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>
